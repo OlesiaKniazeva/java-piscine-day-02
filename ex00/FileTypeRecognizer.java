@@ -1,68 +1,110 @@
 package ex00;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class FileTypeRecognizer {
 
-    private FileInputStream input;
-    private FileOutputStream output;
+    private final HashMap<String, String> signatures;
 
-    private Signatures signatures;
-
-    FileTypeRecognizer(FileInputStream input, FileOutputStream output) throws IOException {
-        this.input = input;
-        this.output = output;
-        signatures = new Signatures(getRawData());
+    FileTypeRecognizer(Path pathToSignatures) {
+        signatures = new HashMap<>();
+        parseSignatures(pathToSignatures);
     }
 
-    public Signatures getSignature() {
+    private void parseSignatures(Path pathToSignatures) {
+        Scanner sc;
+
+        try {
+            if (Files.exists(pathToSignatures)) {
+                sc = new Scanner(pathToSignatures);
+                while (sc.hasNextLine()) {
+                    String line = sc.nextLine();
+                    String[] data = line.split(", ");
+                    signatures.put(data[0], data[1]);
+                }
+            } else {
+                System.out.println("No file signatures.txt");
+            }
+        } catch (IOException e) {
+            System.out.println("Problem with file signatures.txt");
+        }
+    }
+
+    public void printSignatures() {
+        for (Map.Entry<String, String> entry : signatures.entrySet()) {
+            System.out.println("----------");
+            System.out.println('\'' + entry.getKey() + '\'' + " = " + '\'' + entry.getValue() + '\'');
+            System.out.println("----------");
+        }
+    }
+
+    public HashMap<String, String> getSignature() {
         return signatures;
     }
 
-    private byte[] getRawData() throws IOException {
-        if (input == null) {
-            return null;
-        }
-
-        int size = input.available();
-        byte[] data = new byte[size];
-
-        input.read(data);
-        return data;
-    }
-
-    public void recognize() throws FileNotFoundException {
+    public void recognizeFile() throws IOException {
         Scanner sc = new Scanner(System.in);
+        File file = new File("results.txt");
+        FileInputStream input;
+        PrintWriter fw = null;
+
+        try {
+            fw = new PrintWriter(file);
+        } catch (IOException e) {
+            System.out.println("Couldn't create file results.txt");
+            System.exit(1);
+        }
 
         while (true) {
-            try {
-                System.out.println("Enter path to file: ");
-                String path = sc.nextLine();
-
-                FileInputStream file = new FileInputStream(path);
-
-                byte[] fileArr = new byte[file.available()];
-                file.read(fileArr);
-
-                String data = new String(fileArr);
-
-                checkIfSignatureFound(data);
-            } catch (IOException e) {
-                System.out.println("No file found, check if path to file is right!");
+            boolean flag = false;
+            String pathRes = sc.nextLine();
+            if (pathRes.equals("42")) {
+                break;
             }
-        }
-    }
 
-    private void checkIfSignatureFound(String data) {
-//        for (Map.Entry<String, String> entry : signatures.getSignatures().entrySet()) {
-//            if ()
-//        }
-        System.out.println(data);
+            try {
+                input = new FileInputStream(pathRes);
+            } catch (FileNotFoundException e) {
+                System.out.println("WRONG PATH TO FILE");
+                continue;
+            }
+
+            byte[] code = new byte[20];
+            StringBuilder builder = new StringBuilder();
+            int amountOfRead = input.read(code);
+
+            for (int i = 0; i < amountOfRead; i++) {
+                String s = Integer.toHexString(code[i]).toUpperCase();
+                System.out.println(s);
+                if (s.length() < 2) {
+                    builder.append('0').append(s).append(" ");
+                } else {
+                    builder.append(s).append(" ");
+                }
+            }
+
+            System.out.println(builder);
+
+            for (Map.Entry<String, String> entry : signatures.entrySet()) {
+                if (builder.toString().startsWith(entry.getValue())) {
+                    System.out.println("PROCESSED");
+                    flag = true;
+                    fw.append(entry.getKey()).append(String.valueOf('\n'));
+                }
+            }
+
+            if (!flag) {
+                System.out.println("UNDEFINED");
+            }
+            input.close();
+        }
+        fw.flush();
+        fw.close();
     }
 
 }
