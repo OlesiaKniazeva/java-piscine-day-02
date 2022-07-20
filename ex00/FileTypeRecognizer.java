@@ -80,15 +80,12 @@ public class FileTypeRecognizer {
 
             for (int i = 0; i < amountOfRead; i++) {
                 String s = Integer.toHexString(code[i]).toUpperCase();
-                System.out.println(s);
                 if (s.length() < 2) {
                     builder.append('0').append(s).append(" ");
                 } else {
                     builder.append(s).append(" ");
                 }
             }
-
-            System.out.println(builder);
 
             for (Map.Entry<String, String> entry : signatures.entrySet()) {
                 if (builder.toString().startsWith(entry.getValue())) {
