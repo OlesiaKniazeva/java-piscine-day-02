@@ -29,9 +29,11 @@ public class FileTypeRecognizer {
                 }
             } else {
                 System.out.println("No file signatures.txt");
+                System.exit(1);
             }
         } catch (IOException e) {
             System.out.println("Problem with file signatures.txt");
+            System.exit(1);
         }
     }
 

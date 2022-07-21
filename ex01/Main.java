@@ -9,6 +9,9 @@ public class Main {
         } else {
             Similarity s = new Similarity(args[0], args[1]);
             s.checkSimilarity();
+            s.printSet();
+            s.printMap1();
+            s.printMap2();
         }
     }
 }

@@ -70,9 +70,13 @@ public class Similarity {
                 b += res * res;
             }
         }
-        denominator = (double) Math.sqrt(a) * Math.sqrt(b);
+        numerator = Math.floor(numerator * 100) / 100;
+        denominator = (double)Math.floor(Math.sqrt(a) * Math.sqrt(b) * 100) / 100;
 
         similarity = Math.floor(numerator / denominator * 100) / 100;
+        if (denominator == 0) {
+            similarity = 0;
+        }
     }
 
     private void readDataFromFile() throws FileNotFoundException {
