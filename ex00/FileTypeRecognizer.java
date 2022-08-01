@@ -94,6 +94,7 @@ public class FileTypeRecognizer {
                     System.out.println("PROCESSED");
                     flag = true;
                     fw.append(entry.getKey()).append(String.valueOf('\n'));
+                    fw.flush();
                 }
             }
 
@@ -102,7 +103,6 @@ public class FileTypeRecognizer {
             }
             input.close();
         }
-        fw.flush();
         fw.close();
     }
 
